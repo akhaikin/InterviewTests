@@ -10,15 +10,10 @@ namespace GraduationTracker
     {
         public static Student GetStudent(int id)
         {
-            var students = GetStudents();
             Student student = null;
-
-            for (int i = 0; i < students.Length; i++)
+            if (GetStudents().ContainsKey(id))
             {
-                if (id == students[i].Id)
-                {
-                    student = students[i];
-                }
+                student = GetStudents()[id];
             }
             return student;
         }
@@ -38,10 +33,14 @@ namespace GraduationTracker
             return diploma;
 
         }
-
         public static Requirement GetRequirement(int id)
         {
             var requirements = GetRequirements();
+            Requirement requirement = GetRequirement(requirements, id);
+            return requirement;
+        }
+        public static Requirement GetRequirement(Requirement[] requirements, int id)
+        {
             Requirement requirement = null;
 
             for (int i = 0; i < requirements.Length; i++)
@@ -49,6 +48,7 @@ namespace GraduationTracker
                 if (id == requirements[i].Id)
                 {
                     requirement = requirements[i];
+                    return requirement; //AK
                 }
             }
             return requirement;
@@ -63,71 +63,61 @@ namespace GraduationTracker
                 {
                     Id = 1,
                     Credits = 4,
-                    Requirements = new int[]{100,102,103,104}
+                    Requirements = Requirement.GetAllIDs()
                 }
             };
         }
 
         public static Requirement[] GetRequirements()
-        {   
-                return new[]
-                {
-                    new Requirement{Id = 100, Name = "Math", MinimumMark=50, Courses = new int[]{1}, Credits=1 },
-                    new Requirement{Id = 102, Name = "Science", MinimumMark=50, Courses = new int[]{2}, Credits=1 },
-                    new Requirement{Id = 103, Name = "Literature", MinimumMark=50, Courses = new int[]{3}, Credits=1},
-                    new Requirement{Id = 104, Name = "Physichal Education", MinimumMark=50, Courses = new int[]{4}, Credits=1 }
-                };
-        }
-        private static Student[] GetStudents()
         {
-            return new[]
+            var result = Requirement.CreateAll();
+            return result;
+        }
+
+        private static void addCourses(Student student, int mark)
+        {
+            for (Course.enValues i1 = Course.enValues.Math; i1 <= Course.enValues.PhysichalEducation; i1++)
             {
-               new Student
-               {
-                   Id = 1,
-                   Courses = new Course[]
-                   {
-                        new Course{Id = 1, Name = "Math", Mark=95 },
-                        new Course{Id = 2, Name = "Science", Mark=95 },
-                        new Course{Id = 3, Name = "Literature", Mark=95 },
-                        new Course{Id = 4, Name = "Physichal Education", Mark=95 }
-                   }
-               },
-               new Student
-               {
-                   Id = 2,
-                   Courses = new Course[]
-                   {
-                        new Course{Id = 1, Name = "Math", Mark=80 },
-                        new Course{Id = 2, Name = "Science", Mark=80 },
-                        new Course{Id = 3, Name = "Literature", Mark=80 },
-                        new Course{Id = 4, Name = "Physichal Education", Mark=80 }
-                   }
-               },
-            new Student
+                Course course = student.AddCourse(i1);
+                course.Mark = mark;
+            }
+        }
+        private static Student[] _studentsAll;
+        private static Dictionary<int, Student> _students;
+        private static Dictionary<int, Student> GetStudents()
+        {
+            if (_students == null)
             {
-                Id = 3,
-                Courses = new Course[]
+                createStudents();
+            }
+            return _students;
+        }
+        private static void createStudents()
+        {
+            var marks = new int[] { 95, 80, 50, 40 };
+            _studentsAll = new Student[4];
+            _students = new Dictionary<int, Student>();
+            int i2 = 0;
+            for (int i1 = 0; i1 < _studentsAll.Length; i1++)
+            {
+                Student student = new Student(i1 + 1);
+                _studentsAll[i1] = student;
+                _students.Add(student.Id, student);
+                addCourses(student, marks[i2]);
+                if (i2 < marks.Length - 1)
                 {
-                    new Course{Id = 1, Name = "Math", Mark=50 },
-                    new Course{Id = 2, Name = "Science", Mark=50 },
-                    new Course{Id = 3, Name = "Literature", Mark=50 },
-                    new Course{Id = 4, Name = "Physichal Education", Mark=50 }
-                }
-            },
-            new Student
-            {
-                Id = 4,
-                Courses = new Course[]
-                {
-                    new Course{Id = 1, Name = "Math", Mark=40 },
-                    new Course{Id = 2, Name = "Science", Mark=40 },
-                    new Course{Id = 3, Name = "Literature", Mark=40 },
-                    new Course{Id = 4, Name = "Physichal Education", Mark=40 }
+                    i2++;
                 }
             }
+        }
 
-            };
+        public static Student[] GetStudentsAll()
+        {
+            if (_studentsAll == null)
+            {
+                createStudents();
+            }
+            return _studentsAll;
         }
     }
 
